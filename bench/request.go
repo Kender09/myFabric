@@ -1,10 +1,11 @@
-package bench
+package main
 
 import(
   "net/http"
   "fmt"
   "bytes"
   "encoding/json"
+  "io/ioutil"
 )
 
 type chaincode struct{
@@ -36,8 +37,8 @@ var TransactionType = map[string]int{
       "query": 5,
     }
 
-func postJSON(url string, data []byte) {
-  req, err := http.NewRequest("POST", url, bytes.NewBuffer(data))
+func postJSON(ip string, data []byte) {
+  req, err := http.NewRequest("POST", "http://" + ip + ":7050/chaincode", bytes.NewBuffer(data))
   if err != nil {
     fmt.Println(err)
     panic(err)
@@ -50,6 +51,8 @@ func postJSON(url string, data []byte) {
     fmt.Println(err2)
     panic(err2)
   }
+  body, _ := ioutil.ReadAll(resp.Body)
+  fmt.Printf("%+v\n", string(body))
 
   defer resp.Body.Close()
 }

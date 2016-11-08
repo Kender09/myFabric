@@ -1,4 +1,4 @@
-package bench
+package main
 
 import(
   "time"
@@ -6,6 +6,7 @@ import(
 
 func measureTime(data *profData, fn func()) {
   start := time.Now()
+  fn()
   defer recordTime(start, data)
 }
 

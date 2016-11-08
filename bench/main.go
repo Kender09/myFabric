@@ -1,7 +1,9 @@
-package bench
+package main
 
 import (
   "sync"
+  "flag"
+  "fmt"
 )
 
 type Worker struct{
@@ -50,9 +52,33 @@ func (w *Worker) chainReqController(action string) {
       msg.Args = []string{"init", "a", "10000", "b", "10000", "c", "10000"}
     }
   }
+  _, ok := w.benchData.data[action]
+  if !ok {
+    w.benchData.data[action] = new(profData)
+    w.benchData.data[action].count = 0
+    w.benchData.data[action].sum = 0.0
+    w.benchData.data[action].max = 0.0
+  }
   measureTime(w.benchData.data[action], func() {
     postJSON(w.ip, createChainReq(action, msg))
   })
 }
 
+func main() {
+  var a_ip = flag.String("a", "localhost", "ipアドレス")
+  //var b_ip = flag.String("b", "0.0.0.0", "ipアドレス")
+  //var c_ip = flag.String("c", "0.0.0.0", "ipアドレス")
+  flag.Parse()
+
+  // init
+  var a_w Worker
+  a_w.campany.name = "a"
+  a_w.campany.partner = "b"
+  a_w.id = 1
+  a_w.ip = *a_ip
+  a_w.benchData.data = map[string]*profData{}
+
+  a_w.chainReqController("invoke")
+  fmt.Printf("%+v", a_w.benchData.data["invoke"])
+}
 
