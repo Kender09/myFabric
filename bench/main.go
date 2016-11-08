@@ -4,6 +4,7 @@ import (
   "sync"
   "flag"
   "fmt"
+  "time"
 )
 
 type Worker struct{
@@ -39,36 +40,14 @@ type VPs struct{
 
 var vps VPs
 
-func (w *Worker) chainReqController(action string) {
-  var msg CtorMsg
-  switch action {
-    case "invoke": {
-      msg.Args = []string{"invoke", w.campany.name, w.campany.partner, "1"}
-    }
-    case "query": {
-      msg.Args = []string{"query", w.campany.name}
-    }
-    case "deploy": {
-      msg.Args = []string{"init", "a", "10000", "b", "10000", "c", "10000"}
-    }
-  }
-  _, ok := w.benchData.data[action]
-  if !ok {
-    w.benchData.data[action] = new(profData)
-    w.benchData.data[action].count = 0
-    w.benchData.data[action].sum = 0.0
-    w.benchData.data[action].max = 0.0
-  }
-  measureTime(w.benchData.data[action], func() {
-    postJSON(w.ip, createChainReq(action, msg))
-  })
-}
-
 func main() {
   var a_ip = flag.String("a", "localhost", "ipアドレス")
   //var b_ip = flag.String("b", "0.0.0.0", "ipアドレス")
   //var c_ip = flag.String("c", "0.0.0.0", "ipアドレス")
   flag.Parse()
+
+  var wg *sync.WaitGroup
+  wg = &sync.WaitGroup{}
 
   // init
   var a_w Worker
@@ -78,7 +57,10 @@ func main() {
   a_w.ip = *a_ip
   a_w.benchData.data = map[string]*profData{}
 
-  a_w.chainReqController("invoke")
+  endtime := time.Now().Add(1*time.Second)
+  a_w.work(endtime, wg)
+  wg.Wait()
+
   fmt.Printf("%+v", a_w.benchData.data["invoke"])
 }
 
