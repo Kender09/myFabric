@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package chain
+package main
 
 //WARNING - this chaincode's ID is hard-coded in chaincode_example04 to illustrate one way of
 //calling chaincode from a chaincode. If this example is modified, chaincode_example04.go has
@@ -41,7 +41,7 @@ func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface) ([]byte, error)
 	var err error
 
 	if len(args) != 6 {
-		return nil, errors.New("Incorrect number of arguments. Expecting 4")
+		return nil, errors.New("Incorrect number of arguments. Expecting 6")
 	}
 
 	// Initialize the chaincode
@@ -56,7 +56,7 @@ func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface) ([]byte, error)
 		return nil, errors.New("Expecting integer value for asset holding")
 	}
 	C = args[4]
-	Bval, err = strconv.Atoi(args[5])
+	Cval, err = strconv.Atoi(args[5])
 	if err != nil {
 		return nil, errors.New("Expecting integer value for asset holding")
 	}
