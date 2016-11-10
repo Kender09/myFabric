@@ -2,6 +2,7 @@ package main
 
 import(
   "time"
+  "fmt"
 )
 
 func measureTime(data *profData, fn func()) {
@@ -15,6 +16,6 @@ func recordTime(start time.Time, data *profData) {
   measure_time := (end.Sub(start)).Seconds()
   data.count += 1
   data.sum += measure_time
-  data.histgram[end.String()] = measure_time
+  data.histgram[end.String()] = fmt.Sprint(measure_time)
   if data.max < measure_time { data.max = measure_time }
 }

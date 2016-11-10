@@ -7,30 +7,6 @@ import (
   "time"
 )
 
-type Worker struct{
-  campany Campany
-  id int
-  ip string
-  chName string
-  benchData map[string]*profData
-  res string
-  res_err error
-  mu sync.Mutex
-}
-
-type Campany struct{
-  name string
-  partner string
-}
-
-type profData struct{
-  count int
-  err_cnt int
-  sum float64
-  max float64
-  histgram map[string]float64
-}
-
 type VPs struct{
   ips []string
 }
@@ -60,6 +36,6 @@ func main() {
   a_w.work(endtime, wg)
   wg.Wait()
 
-  fmt.Printf("%+v", a_w.benchData["invoke"])
+  a_w.resultPrintf()
 }
 
