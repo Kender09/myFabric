@@ -16,7 +16,7 @@ type chaincode struct{
 }
 
 type Param struct{
-  Type        int      `json:"type"`
+  Type        int         `json:"type"`
   ChaincodeID ChaincodeID `json:"chaincodeID"`
   CtorMsg     CtorMsg     `json:"ctorMsg"`
 }
@@ -37,8 +37,8 @@ var TransactionType = map[string]int{
       "query": 5,
     }
 
-func postJSON(ip string, data []byte) {
-  req, err := http.NewRequest("POST", "http://" + ip + ":7050/chaincode", bytes.NewBuffer(data))
+func postJSON(w *Worker, data []byte){
+  req, err := http.NewRequest("POST", "http://" + w.ip + ":7050/chaincode", bytes.NewBuffer(data))
   if err != nil {
     fmt.Println(err)
     panic(err)
@@ -49,12 +49,16 @@ func postJSON(ip string, data []byte) {
   resp, err2 := client.Do(req)
   if err2 != nil {
     fmt.Println(err2)
-    panic(err2)
+    w.res = ""
+    w.res_err = err2
+    return
   }
   body, _ := ioutil.ReadAll(resp.Body)
   fmt.Printf("%+v\n", string(body))
 
   defer resp.Body.Close()
+  w.res = string(body)
+  w.res_err = nil
 }
 
 func createChainReq(action string, msg CtorMsg) []byte{

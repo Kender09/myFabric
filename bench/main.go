@@ -12,7 +12,9 @@ type Worker struct{
   id int
   ip string
   chName string
-  benchData benchData
+  benchData map[string]*profData
+  res string
+  res_err error
   mu sync.Mutex
 }
 
@@ -21,17 +23,12 @@ type Campany struct{
   partner string
 }
 
-// まだ考え中
-type benchData struct{
-  data map[string]*profData
-  err_cnt int
-  err_strs []string
-}
-
 type profData struct{
   count int
+  err_cnt int
   sum float64
   max float64
+  histgram map[string]float64
 }
 
 type VPs struct{
@@ -52,11 +49,7 @@ func main() {
 
   // init
   var a_w Worker
-  a_w.campany.name = "a"
-  a_w.campany.partner = "b"
-  a_w.id = 1
-  a_w.ip = *a_ip
-  a_w.benchData.data = map[string]*profData{}
+  a_w.init("a", "b", *a_ip)
 
   duration, err := time.ParseDuration(*interval_time)
   if err != nil {
@@ -67,6 +60,6 @@ func main() {
   a_w.work(endtime, wg)
   wg.Wait()
 
-  fmt.Printf("%+v", a_w.benchData.data["invoke"])
+  fmt.Printf("%+v", a_w.benchData["invoke"])
 }
 
