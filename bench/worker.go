@@ -14,6 +14,7 @@ type Worker struct{
   id int
   ip string
   benchData map[string]*profData
+  req_cnt int
   res string
   res_err error
   mu sync.Mutex
@@ -35,7 +36,7 @@ type profData struct{
 var workid int = 1
 
 func writeCsv(filename string, outmap map[string]string) {
-  file, err := os.OpenFile("logs/" + filename + ".csv", os.O_WRONLY|os.O_CREATE, 0600)
+  file, err := os.OpenFile("logs/" + filename + ".csv", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
   if err != nil {
     fmt.Println(err)
   }
@@ -53,6 +54,7 @@ func (w *Worker) init(name string, partner string, ip string) {
   w.campany.partner = partner
   w.id = workid
   w.ip = ip
+  w.req_cnt = 0
   w.benchData = map[string]*profData{}
   workid += 1
 }
@@ -88,7 +90,7 @@ func (w *Worker) chainReqController(action string) {
     w.benchData[action].histgram = map[string]string{}
   }
   measureTime(w.benchData[action], func() {
-    postJSON(w, createChainReq(action, msg))
+    postJSON(w, createChainReq(action, msg, w.req_cnt))
   })
   status := strings.Contains(w.res, "OK")
   if w.res_err != nil || !status {

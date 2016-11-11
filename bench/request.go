@@ -29,8 +29,6 @@ type CtorMsg struct{
   Args []string `json:"args"`
 }
 
-var ReqCount int
-
 var TransactionType = map[string]int{
       "deploy": 2,
       "invoke": 4,
@@ -47,6 +45,7 @@ func postJSON(w *Worker, data []byte){
 
   client := http.Client{}
   resp, err2 := client.Do(req)
+  w.req_cnt += 1
   if err2 != nil {
     fmt.Println(err2)
     w.res = ""
@@ -61,7 +60,7 @@ func postJSON(w *Worker, data []byte){
   w.res_err = nil
 }
 
-func createChainReq(action string, msg CtorMsg) []byte{
+func createChainReq(action string, msg CtorMsg, id int) []byte{
   chaincodeID := ChaincodeID{
    // blockchain一つしか使わない予定なので
     Name: "mycc",
@@ -76,7 +75,7 @@ func createChainReq(action string, msg CtorMsg) []byte{
     Jsonrpc: "2.0",
     Method:  action,
     Params:  params,
-    ID:      ReqCount,
+    ID:      id,
   }
   data, err := json.Marshal(post_data)
   if err != nil {

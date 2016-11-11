@@ -7,16 +7,10 @@ import (
   "time"
 )
 
-type VPs struct{
-  ips []string
-}
-
-var vps VPs
-
 func main() {
   var a_ip = flag.String("a", "localhost", "ipアドレス")
-  //var b_ip = flag.String("b", "0.0.0.0", "ipアドレス")
-  //var c_ip = flag.String("c", "0.0.0.0", "ipアドレス")
+  //var b_ip = flag.String("b", "localhost", "ipアドレス")
+  //var c_ip = flag.String("c", "localhost", "ipアドレス")
   var interval_time = flag.String("time", "1s", "ベンチ時間")
   flag.Parse()
 
@@ -33,6 +27,7 @@ func main() {
     panic(err)
   }
   endtime := time.Now().Add(duration)
+
   a_w.work(endtime, wg)
   wg.Wait()
 
