@@ -17,7 +17,7 @@ type Worker struct{
   req_cnt int
   res string
   res_err error
-  mu sync.Mutex
+  m *sync.Mutex
 }
 
 type Campany struct{
@@ -35,6 +35,17 @@ type profData struct{
 
 var workid int = 1
 
+func (w *Worker) init(name string, partner string, ip string) {
+  w.campany.name = name
+  w.campany.partner = partner
+  w.id = workid
+  w.ip = ip
+  w.req_cnt = 0
+  w.benchData = map[string]*profData{}
+  w.m = new(sync.Mutex)
+  workid += 1
+}
+
 func writeCsv(filename string, outmap map[string]string) {
   file, err := os.OpenFile("logs/" + filename + ".csv", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
   if err != nil {
@@ -47,16 +58,6 @@ func writeCsv(filename string, outmap map[string]string) {
     writer.Write([]string{k, v})
   }
   writer.Flush()
-}
-
-func (w *Worker) init(name string, partner string, ip string) {
-  w.campany.name = name
-  w.campany.partner = partner
-  w.id = workid
-  w.ip = ip
-  w.req_cnt = 0
-  w.benchData = map[string]*profData{}
-  workid += 1
 }
 
 func (w *Worker) resultPrintf() {
@@ -82,14 +83,16 @@ func (w *Worker) chainReqController(action string) {
   }
   _, ok := w.benchData[action]
   if !ok {
+    w.m.Lock()
     w.benchData[action] = new(profData)
     w.benchData[action].count = 0.0
     w.benchData[action].err_cnt = 0.0
     w.benchData[action].sum = 0.0
     w.benchData[action].max = 0.0
     w.benchData[action].histgram = map[string]string{}
+    w.m.Unlock()
   }
-  measureTime(w.benchData[action], func() {
+  measureTime(w.benchData[action], w.m, func() {
     postJSON(w, createChainReq(action, msg, w.req_cnt))
   })
   status := strings.Contains(w.res, "OK")
@@ -106,6 +109,7 @@ func (w *Worker) work(endtime time.Time, wg *sync.WaitGroup) {
       w.chainReqController("invoke")
       nowtime = time.Now()
       if nowtime.After(endtime) { break }
+      //time.Sleep(100 * time.Millisecond)
     }
     wg.Done()
   }(w, endtime)

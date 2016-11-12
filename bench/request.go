@@ -53,7 +53,7 @@ func postJSON(w *Worker, data []byte){
     return
   }
   body, _ := ioutil.ReadAll(resp.Body)
-  fmt.Printf("%+v\n", string(body))
+  // fmt.Printf("%+v\n", string(body))
 
   defer resp.Body.Close()
   w.res = string(body)
