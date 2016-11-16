@@ -36,11 +36,11 @@ type SimpleChaincode struct {
 
 func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface) ([]byte, error) {
 	_, args := stub.GetFunctionAndParameters()
-	var A, B, C string    // Entities
-	var Aval, Bval, Cval int // Asset holdings
+	var A, B, C, D string    // Entities
+	var Aval, Bval, Cval, Dval int // Asset holdings
 	var err error
 
-	if len(args) != 6 {
+	if len(args) != 8 {
 		return nil, errors.New("Incorrect number of arguments. Expecting 6")
 	}
 
@@ -60,7 +60,13 @@ func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface) ([]byte, error)
 	if err != nil {
 		return nil, errors.New("Expecting integer value for asset holding")
 	}
-	fmt.Printf("Aval = %d, Bval = %d, Cval = %d\n", Aval, Bval, Cval)
+	D = args[6]
+	Dval, err = strconv.Atoi(args[7])
+	if err != nil {
+		return nil, errors.New("Expecting integer value for asset holding")
+	}
+
+	fmt.Printf("Aval = %d, Bval = %d, Cval = %d, Dval= %d\n", Aval, Bval, Cval, Dval)
 
 	// Write the state to the ledger
 	err = stub.PutState(A, []byte(strconv.Itoa(Aval)))
@@ -74,6 +80,11 @@ func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface) ([]byte, error)
 	}
 
 	err = stub.PutState(C, []byte(strconv.Itoa(Cval)))
+	if err != nil {
+		return nil, err
+	}
+
+	err = stub.PutState(D, []byte(strconv.Itoa(Dval)))
 	if err != nil {
 		return nil, err
 	}
