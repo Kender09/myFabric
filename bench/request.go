@@ -19,6 +19,7 @@ type Param struct{
   Type        int         `json:"type"`
   ChaincodeID ChaincodeID `json:"chaincodeID"`
   CtorMsg     CtorMsg     `json:"ctorMsg"`
+  SecureContext string    `json:"secureContext"`
 }
 
 type ChaincodeID struct{
@@ -60,15 +61,16 @@ func postJSON(w *Worker, data []byte){
   w.res_err = nil
 }
 
-func createChainReq(action string, msg CtorMsg, id int) []byte{
+func createChainReq(action string, msg CtorMsg, id int, user string) []byte{
   chaincodeID := ChaincodeID{
    // blockchain一つしか使わない予定なので
-    Name: "mycc",
+    Name: "mycc4",
   }
   params := Param{
     Type: TransactionType[action],
     ChaincodeID: chaincodeID,
     CtorMsg: msg,
+    SecureContext: user,
   }
 
   post_data := chaincode{

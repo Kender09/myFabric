@@ -13,6 +13,7 @@ type Worker struct{
   campany Campany
   id int
   ip string
+  user string
   benchData map[string]*profData
   req_cnt int
   res string
@@ -35,7 +36,8 @@ type profData struct{
 
 var workid int = 1
 
-func (w *Worker) init(name string, partner string, ip string) {
+func (w *Worker) init(name string, partner string, ip string, user string) {
+  w.user = user
   w.campany.name = name
   w.campany.partner = partner
   w.id = workid
@@ -93,7 +95,7 @@ func (w *Worker) chainReqController(action string) {
     w.m.Unlock()
   }
   measureTime(w.benchData[action], w.m, func() {
-    postJSON(w, createChainReq(action, msg, w.req_cnt))
+    postJSON(w, createChainReq(action, msg, w.req_cnt, w.user))
   })
   status := strings.Contains(w.res, "OK")
   if w.res_err != nil || !status {
@@ -111,6 +113,7 @@ func (w *Worker) work(endtime time.Time, wg *sync.WaitGroup) {
       if nowtime.After(endtime) { break }
       //time.Sleep(100 * time.Millisecond)
     }
+    //w.chainReqController("query")
     wg.Done()
   }(w, endtime)
 }
